@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/alhikmahsearch/static/css/main.fee26990.css",
-    "main.js": "/alhikmahsearch/static/js/main.239dea28.js",
+    "main.js": "/alhikmahsearch/static/js/main.4da1ddcc.js",
     "static/js/787.295a35c4.chunk.js": "/alhikmahsearch/static/js/787.295a35c4.chunk.js",
     "static/media/logo.svg": "/alhikmahsearch/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/alhikmahsearch/index.html",
     "main.fee26990.css.map": "/alhikmahsearch/static/css/main.fee26990.css.map",
-    "main.239dea28.js.map": "/alhikmahsearch/static/js/main.239dea28.js.map",
+    "main.4da1ddcc.js.map": "/alhikmahsearch/static/js/main.4da1ddcc.js.map",
     "787.295a35c4.chunk.js.map": "/alhikmahsearch/static/js/787.295a35c4.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.fee26990.css",
-    "static/js/main.239dea28.js"
+    "static/js/main.4da1ddcc.js"
   ]
 }
