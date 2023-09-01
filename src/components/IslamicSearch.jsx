@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import GroupVerse from './GroupVerse';
 import '../IslamicSearch.css'; // assuming you have a CSS file with the same styles
+import LoadingButton from '@mui/lab/LoadingButton';
+import SearchIcon from '@mui/icons-material/Search';
+import Paper from '@mui/material/Paper';
+import InputBase from '@mui/material/InputBase';
+import Divider from '@mui/material/Divider';
+import Box from '@mui/material/Box'
+
 
 const IslamicSearch = () => {
   const [userQuery, setUserQuery] = useState('');
@@ -51,7 +59,7 @@ const IslamicSearch = () => {
     };
     fetchAllTafsirs();    
 
-    setLoading(false);
+    
   };
 
   const fetchArabicText = async (key) => {
@@ -63,7 +71,6 @@ const IslamicSearch = () => {
     const fetchAllArabicTexts = async () => {
     const allGroups = await Promise.all(
         groupVerses.map(async (group) => {
-        console.log("group:", group)
         const textsInGroup = await Promise.all(group.map(fetchArabicText));
         return textsInGroup.join(' ');
         })
@@ -82,30 +89,49 @@ const IslamicSearch = () => {
 
   useEffect(()=>{
     fetchAllArabicTexts();
+    setLoading(false);
 }, [groupVerses])
 
 
   return (
     <div className="container">
-      <h1>Islamic Search</h1>
-      <input
-        style={{ width: '80%', height: '30px' }}
-        type="text"
-        value={userQuery}
-        onChange={(e) => setUserQuery(e.target.value)}
-        placeholder="Enter your query"
-        maxLength="100"
-      />
-      <button onClick={search}>Search</button>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
+      <h1>Al-Hikmah Search</h1>
+
+<Box display="flex"
+  justifyContent="center"
+  alignItems="center"
+  padding={3}>
+  <Paper
+      component="form"
+      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width:'80%', maxWidth: 800 }}
+    >
+        <InputBase
+          sx={{ ml: 1, flex: 1 , width: 400}}
+          placeholder="What is my mission"
+          value={userQuery}
+          onChange={(e) => setUserQuery(e.target.value)}
+          inputProps={{ maxLength: 100 }}
+        />
+        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+        <LoadingButton
+          size="small"
+          onClick={search}
+          endIcon={<SearchIcon />}
+          loading={loading}
+          loadingPosition="end"
+          variant="contained"
+        >
+          <span>Search</span>
+      </LoadingButton>
+    </Paper>
+</Box>
+      {
         arabicText.map((text, index) => (
           <div key={index}>
             <div>
                 <p><strong>Start Verse:</strong>{groupVerses[index][0]}</p>
-              <p><strong>Arabic:</strong> {text}</p>
-              <p><strong>Translation:</strong> {resultList[index]}</p>
+              <p> {text}</p>
+              <p> {resultList[index]}</p>
               <button onClick={() => toggleTafsir(index)}>Tafsir</button>
 
               {showTafsir === index && (
@@ -116,7 +142,7 @@ const IslamicSearch = () => {
             </div>
           </div>
         ))
-      )}
+      }
       
     </div>
   );
