@@ -17,13 +17,17 @@ const IslamicSearch = () => {
   const [tafsir_ibn_kathir, set_tafsir_ibn_kathir] =useState([])
   const [groupVerses, setGroupVerses] = useState([])
   const [arabicText, setArabicText] = useState([]);
-  const [showTafsir, setShowTafsir] = useState(null);
+  const [maarif_ul_quran, set_maarif_ul_quran] = useState([])
 
   const search = async () => {
-    setLoading(true);
+    
     setResultList([]);
     setMetadataList([]);
-
+    set_tafsir_ibn_kathir([])
+    setGroupVerses([])
+    setArabicText([])
+    setLoading(true);
+    if (userQuery.length == 0) return
     const response = await fetch("https://islamicsearch-4dbe9a36a60c.herokuapp.com/Quran", {
       method: "POST",
       headers: {
@@ -37,6 +41,7 @@ const IslamicSearch = () => {
     if (data && Array.isArray(data["documents"]) && Array.isArray(data["metadatas"])) {
       setResultList(data["documents"][0]);
       setMetadataList(data["metadatas"][0]);
+      setLoading(false);
     }
 
     const fetchTafsir = async (verseKey) => {
@@ -53,48 +58,88 @@ const IslamicSearch = () => {
     const tafsirs = await Promise.all(startVerseKeys.map(fetchTafsir));
     
     const tafsirTexts = tafsirs.map(tafsir => tafsir.text);
-    const groupVerses = tafsirs.map(tafsir => tafsir.verses);
+    const currentGroupVerses = tafsirs.map(tafsir => tafsir.verses);
     set_tafsir_ibn_kathir(tafsirTexts);
-    setGroupVerses(groupVerses);
+    setGroupVerses(currentGroupVerses);
     };
     fetchAllTafsirs();    
 
     
   };
 
-  const fetchArabicText = async (key) => {
-    const response = await fetch(`https://api.quran.com/api/v4/quran/verses/indopak?verse_key=${key}`);
-    const data = await response.json();
-    return data["verses"][0]["text_indopak"] + '[' + data["verses"][0]["verse_key"].split(':')[1] + ']';
-    };
-
-    const fetchAllArabicTexts = async () => {
+  const fetchTextAndTafsir = async (key) => {
+    const arabicPromise = fetch(`https://api.quran.com/api/v4/quran/verses/indopak?verse_key=${key}`)
+      .then(response => response.json())
+      .then(data => data["verses"][0]["text_indopak"] + '[' + data["verses"][0]["verse_key"].split(':')[1] + ']');
+  
+    const tafsirPromise = fetch(`https://api.qurancdn.com/api/qdc/tafsirs/en-tafsir-maarif-ul-quran/by_ayah/${key}`)
+      .then(response => response.json())
+      .then(data => data['tafsir']['text']);
+  
+    return Promise.all([arabicPromise, tafsirPromise]);
+  };
+  
+  // const fetchAllTexts = async () => {
+  //   const allGroups = await Promise.all(
+  //     groupVerses.map(async (group) => {
+  //       const allDataInGroup = await Promise.all(group.map(fetchTextAndTafsir));
+  
+  //       const combinedArabicText = allDataInGroup.map(data => data[0]).join(' ');
+  //       const combinedTafsirText = allDataInGroup.map(data => data[1]).join(' ');
+  
+  //       return {
+  //         arabicText: combinedArabicText,
+  //         tafsirText: combinedTafsirText
+  //       };
+  //     })
+  //   );
+  
+  //   setArabicText(allGroups.map(group => group.arabicText));
+  //   set_maarif_ul_quran(allGroups.map(group => group.tafsirText));
+  // };
+  
+  const fetchAllTexts = async () => {
     const allGroups = await Promise.all(
-        groupVerses.map(async (group) => {
-        const textsInGroup = await Promise.all(group.map(fetchArabicText));
-        return textsInGroup.join(' ');
-        })
+      groupVerses.map(async (group) => {
+        const allDataInGroup = await Promise.all(group.map(fetchTextAndTafsir));
+  
+        let combinedArabicText = "";
+        let combinedTafsirText = "";
+        const uniqueTafsirTexts = new Set();
+  
+        allDataInGroup.forEach(data => {
+          const [arabicText, tafsirText] = data;
+          combinedArabicText += arabicText + ' ';
+  
+          if (!uniqueTafsirTexts.has(tafsirText)) {
+            uniqueTafsirTexts.add(tafsirText);
+            combinedTafsirText += tafsirText + ' ';
+          }
+        });
+  
+        return {
+          arabicText: combinedArabicText.trim(),
+          tafsirText: combinedTafsirText.trim()
+        };
+      })
     );
+  
+    setArabicText(allGroups.map(group => group.arabicText));
+    set_maarif_ul_quran(allGroups.map(group => group.tafsirText));
+  };
 
-    setArabicText(allGroups);
-    };
 
-    const toggleTafsir = (index) => {
-        if (showTafsir === index) {
-          setShowTafsir(null); // Hide if clicking the same index
-        } else {
-          setShowTafsir(index); // Show new index
-        }
-      };
+  useEffect(() => {
+    fetchAllTexts();
+  }, [groupVerses]);
+  
 
-  useEffect(()=>{
-    fetchAllArabicTexts();
-    setLoading(false);
-}, [groupVerses])
+
+
 
 
   return (
-    <div className="container">
+    <div >
       <h1>Al-Hikmah Search</h1>
 
 <Box display="flex"
@@ -103,10 +148,10 @@ const IslamicSearch = () => {
   padding={3}>
   <Paper
       component="form"
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width:'80%', maxWidth: 800 }}
+      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width:'80%' }}
     >
         <InputBase
-          sx={{ ml: 1, flex: 1 , width: 400}}
+          sx={{ ml: 1, flex: 1 }}
           placeholder="What is my mission"
           value={userQuery}
           onChange={(e) => setUserQuery(e.target.value)}
@@ -128,20 +173,8 @@ const IslamicSearch = () => {
       {
         arabicText.map((text, index) => (
           <div key={index}>
-            <GroupVerse startVerse={groupVerses[index][0]} arabicText={text} englishTranslation={resultList[index]} tafsir_ibn_kathir={tafsir_ibn_kathir[index]}></GroupVerse>
+            <GroupVerse startVerse={groupVerses[index][0]} arabicText={text} englishTranslation={resultList[index]} tafsir_ibn_kathir={tafsir_ibn_kathir[index]} maarif_ul_quran={maarif_ul_quran[index]}></GroupVerse>
             <Divider />
-            {/* <div>
-                <p><strong>Start Verse:</strong>{groupVerses[index][0]}</p>
-              <p> {text}</p>
-              <p> {resultList[index]}</p>
-              <button onClick={() => toggleTafsir(index)}>Tafsir</button>
-
-              {showTafsir === index && (
-                <div className="tafsir-popup">
-                  <p>{tafsir_ibn_kathir[index]}</p>
-                </div>
-              )}
-            </div> */}
           </div>
         ))
       }
