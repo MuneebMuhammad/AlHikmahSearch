@@ -1,0 +1,19 @@
+/* GroupVerse.css */
+.group-verse-container {
+    display: flex;
+    margin-bottom: 30px;
+    margin-top: 30px;
+  }
+  
+  .left-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding-right: 20px;
+  }
+  
+  .right-side {
+    flex: 1;
+  }
+  

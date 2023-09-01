@@ -128,7 +128,9 @@ const IslamicSearch = () => {
       {
         arabicText.map((text, index) => (
           <div key={index}>
-            <div>
+            <GroupVerse startVerse={groupVerses[index][0]} arabicText={text} englishTranslation={resultList[index]} tafsir_ibn_kathir={tafsir_ibn_kathir[index]}></GroupVerse>
+            <Divider />
+            {/* <div>
                 <p><strong>Start Verse:</strong>{groupVerses[index][0]}</p>
               <p> {text}</p>
               <p> {resultList[index]}</p>
@@ -139,7 +141,7 @@ const IslamicSearch = () => {
                   <p>{tafsir_ibn_kathir[index]}</p>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         ))
       }
