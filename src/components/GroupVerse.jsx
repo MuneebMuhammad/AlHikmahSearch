@@ -9,7 +9,6 @@ import '../groupVerse.css'
 function GroupVerse(props) {
     const modalId = `bd-example-modal-lg-${props.startVerse}`; // create a unique id based on startVerse or some other unique prop
 
-    console.log("group tafsir:", props.tafsir_ibn_kathir)
   return (
     <div className="group-verse-container">
         <div className="left-side">
@@ -20,7 +19,7 @@ function GroupVerse(props) {
         </div>
         
         <div className="right-side">
-          <p>{props.arabicText}</p>
+          <p dir="rtl">{props.arabicText}</p>
           <p>{props.englishTranslation}</p>
         </div>
         
