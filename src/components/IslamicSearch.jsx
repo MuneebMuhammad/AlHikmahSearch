@@ -7,9 +7,11 @@ import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box'
+import Alert from '@mui/material/Alert';
 
 
 const IslamicSearch = () => {
+  const [showAlert, setShowAlert] = useState(true);
   const [userQuery, setUserQuery] = useState('');
   const [resultList, setResultList] = useState([]);
   const [metadataList, setMetadataList] = useState([]); // Store metadata separately
@@ -20,11 +22,10 @@ const IslamicSearch = () => {
   const [maarif_ul_quran, set_maarif_ul_quran] = useState([])
 
   const search = async () => {
-    
+    setShowAlert(false);
     setResultList([]);
     setMetadataList([]);
     set_tafsir_ibn_kathir([])
-    setGroupVerses([])
     setArabicText([])
     setLoading(true);
     if (userQuery.length == 0) return
@@ -41,7 +42,6 @@ const IslamicSearch = () => {
     if (data && Array.isArray(data["documents"]) && Array.isArray(data["metadatas"])) {
       setResultList(data["documents"][0]);
       setMetadataList(data["metadatas"][0]);
-      setLoading(false);
     }
 
     const fetchTafsir = async (verseKey) => {
@@ -79,25 +79,6 @@ const IslamicSearch = () => {
     return Promise.all([arabicPromise, tafsirPromise]);
   };
   
-  // const fetchAllTexts = async () => {
-  //   const allGroups = await Promise.all(
-  //     groupVerses.map(async (group) => {
-  //       const allDataInGroup = await Promise.all(group.map(fetchTextAndTafsir));
-  
-  //       const combinedArabicText = allDataInGroup.map(data => data[0]).join(' ');
-  //       const combinedTafsirText = allDataInGroup.map(data => data[1]).join(' ');
-  
-  //       return {
-  //         arabicText: combinedArabicText,
-  //         tafsirText: combinedTafsirText
-  //       };
-  //     })
-  //   );
-  
-  //   setArabicText(allGroups.map(group => group.arabicText));
-  //   set_maarif_ul_quran(allGroups.map(group => group.tafsirText));
-  // };
-  
   const fetchAllTexts = async () => {
     const allGroups = await Promise.all(
       groupVerses.map(async (group) => {
@@ -126,6 +107,7 @@ const IslamicSearch = () => {
   
     setArabicText(allGroups.map(group => group.arabicText));
     set_maarif_ul_quran(allGroups.map(group => group.tafsirText));
+    setLoading(false);
   };
 
 
@@ -142,11 +124,13 @@ const IslamicSearch = () => {
     <div >
       <h1>Al-Hikmah Search</h1>
 
+
 <Box display="flex"
   justifyContent="center"
   alignItems="center"
   padding={3}>
   <Paper
+      onSubmit={(e) => e.preventDefault()}
       component="form"
       sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width:'80%' }}
     >
@@ -157,19 +141,39 @@ const IslamicSearch = () => {
           onChange={(e) => setUserQuery(e.target.value)}
           inputProps={{ maxLength: 100 }}
         />
-        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+       
         <LoadingButton
+        type='Submit'
+          style={{paddingRight: "17px"}}
           size="small"
           onClick={search}
           endIcon={<SearchIcon />}
           loading={loading}
-          loadingPosition="end"
+          loadingPosition="center"
           variant="contained"
         >
-          <span>Search</span>
       </LoadingButton>
     </Paper>
 </Box>
+{showAlert && 
+<div>
+  <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" padding={1}>
+    <div style={{ marginBottom: '10px' }}>
+      <Alert severity='info' style={{maxWidth: "500px"}}>
+        🌟<b>Discover Quranic Wisdom Through AI</b>🌟<br />
+        Enter your query in the search bar to explore relevant verses from the Holy Quran. Our advanced AI technology connects you with the teachings of the Quran like never before. Start your journey of knowledge and inspiration today.
+      </Alert>
+    </div>
+    
+    <div style={{ marginTop: '10px' }}>
+      <Alert severity="warning" style={{maxWidth: "500px"}}>
+        <b>Important Note</b><br />
+        Please be aware that the results returned may not always be the perfect match from the Quran or directly relevant to your query. For more in-depth understanding, consider referring to the Tafsir of the verses.
+      </Alert>
+    </div>
+  </Box>
+</div>
+}
       {
         arabicText.map((text, index) => (
           <div key={index}>
@@ -177,7 +181,7 @@ const IslamicSearch = () => {
             <Divider />
           </div>
         ))
-      }
+      }      
       
     </div>
   );
