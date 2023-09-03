@@ -9,7 +9,6 @@ import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert';
 
-
 const IslamicSearch = () => {
   const [showAlert, setShowAlert] = useState(true);
   const [userQuery, setUserQuery] = useState('');
@@ -123,8 +122,7 @@ const IslamicSearch = () => {
   return (
     <div >
       <h1>Al-Hikmah Search</h1>
-
-
+      
 <Box display="flex"
   justifyContent="center"
   alignItems="center"
